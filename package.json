@@ -1,0 +1,27 @@
+{
+  "name": "solid-local-pod-manager",
+  "version": "0.1.0",
+  "description": "Use your filesystem as a local solid pod in the browser",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon src/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "solid",
+    "pod"
+  ],
+  "author": "Otto-AA",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "crypto-js": "^4.0.0",
+    "express": "^4.17.1",
+    "https-localhost": "^4.4.1",
+    "nconf": "^0.10.0",
+    "solid-local-pod": "^0.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.9"
+  }
+}
