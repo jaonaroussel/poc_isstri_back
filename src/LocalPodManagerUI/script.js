@@ -1,6 +1,25 @@
 /** @type {Pod[]} */
 let pods = []
 
+  // mot clef pour le cryptage et décryptage
+  const key = 'my-key';
+
+  // Fonction de crypatage des données en AES,
+  // Avec données d'entrée en deux paramètres: l'information à crypter et la clef.
+  // Et en sortie une infomation décrypter  
+  const Cryptage=(string,key)=>{
+    const informationCrypt = CryptoJS.AES.encrypt(string, key).toString();
+    return informationCrypt;
+  }
+
+  // Fonction de décrypatage des données en AES,
+  // Avec données d'entrée en deux paramètres: l'information à décrypter et la clef.
+  // Et en sortie une infomation crypter 
+  const Decryptage=(string,key)=>{
+    const informationDecrypt = CryptoJS.AES.decrypt(string, key).toString(CryptoJS.enc.Utf8);
+    return informationDecrypt;
+  } 
+
 async function main() {
     try {
         updatePods(await fetchPods());
@@ -20,28 +39,9 @@ async function main() {
         alert('Unexpected Error: ' + JSON.stringify(err))
     }
 
-    // console.log(
-    //     afficherDate().then(response=>{
-    //         console.log(response)
-    //     })
-    // );
+    const date1 = await (await fetch('/get_date')).json();
 
-    const axios = require('axios');
-
-    // Make a request for a user with a given ID
-    axios.get('/get_date')
-    .then(function (response) {
-        // handle success
-        console.log(response);
-    })
-    .catch(function (error) {
-        // handle error
-        console.log(error);
-    })
-    .then(function () {
-        // always executed
-    });
-    let date = new Date();
+    let date = new Date(date1);
     let h = date.getHours();
     let mn = date.getMinutes();
     let s = date.getSeconds();
@@ -178,4 +178,47 @@ class Pod {
     }
 }
 
-main()
+//injecter information 
+async function injecterInfo(information){
+    var infoCrypter = {info:Cryptage(JSON.stringify(information),key)};
+    const res = await fetch('/injecter_info',{
+        method:'POST',
+        body:JSON.stringify(infoCrypter),
+        headers:{
+            'content-type': 'application/json'
+        }
+    })
+    if (res.ok) {
+        $('#exampleModal').modal('hide');
+    }else{
+        throw new Error(res)
+    }
+}
+
+//recuperer information
+async function recupererInfo() {
+    const res = await fetch('/recuperer_info')
+    if (res.ok) {
+        const data = await res.json()
+        return data
+    }else{
+        throw new Error(res)
+    }
+}
+
+$(document).ready(function() {
+    $("#btn_inject_info").on("click",function() {
+        var nom = document.getElementById('info_nom').value;
+        var contenue = document.getElementById('info_contenue').value;
+        var information = {
+            nom : nom,
+            contenue : contenue,
+        }
+        injecterInfo(information);
+    })
+
+});
+
+
+main();
+

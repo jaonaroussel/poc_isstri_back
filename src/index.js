@@ -144,16 +144,18 @@ app.post('/post_information', (req,res) => {
     // Et conversion du JSON en Objet
     const informationDecrypt = JSON.parse(Decryptage(req.body.data,key));
     console.log(informationDecrypt);
-
+    //date
+    var dateSegementation= new Date();
     // segmentation de l'information de l'information
-    tabData=informationDecrypt.values.split('');
+    var tabData=informationDecrypt.values.split('');
 
     for (let i = 0; i < tabData.length; i++) {
         const element = tabData[i];
-        console.log(element,new Date());
+        console.log(element,dateSegementation);
         const fileContent = JSON.stringify(
             {
-                date: new Date(),
+                rang:i,
+                date: dateSegementation,
                 content:element
             }
         );
@@ -165,6 +167,19 @@ app.post('/post_information', (req,res) => {
         }); 
         
     }
+})
+
+app.post('/injecter_info',async (req,res,next)=>{
+    //Decrypter l'information et convertir en objet 
+    const informationDecrypt = JSON.parse(Decryptage(req.body.info,key));
+    //date
+    var dateSegementation= new Date();
+    // segmentation de l'information de l'information
+    var tabData=informationDecrypt.contenue.split('');
+    console.log(tabData);
+    //itteration des atomes 
+    
+    res.status(200).send();
 })
 
 app.post('/deactivate_pod', (req, res, next) => {
