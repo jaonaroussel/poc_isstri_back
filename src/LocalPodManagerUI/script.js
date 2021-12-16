@@ -196,17 +196,68 @@ async function injecterInfo(information){
 }
 
 //recuperer information
-async function recupererInfo() {
-    const res = await fetch('/recuperer_info')
+async function recupererInfo(information) {
+    var date1 = new Date();
+    var infoCrypter = {info:Cryptage(JSON.stringify(information),key)};
+    const res = await fetch('/recuperer_info',{
+        method:'POST',
+        body:JSON.stringify(infoCrypter),
+        headers:{
+            'content-type': 'application/json'
+        }
+    })
     if (res.ok) {
+        console.log(res);
         const data = await res.json()
-        return data
+        $('#Dialogue_information').modal('show');
+        
+        var nom = data.nom;
+        var contenue = data.contenue;        
+        var date2 = new Date();
+
+        var dure = date2.getMilliseconds() - date1.getMilliseconds();
+        $('#info_nom_recuperer').val(nom);
+        $('#info_contenue_recuperer').val(contenue);
+        $('#info_dure_recuperer').val(dure+" Milisecode");
     }else{
         throw new Error(res)
     }
 }
+function dateDiff(date1, date2){
+    var diff = {}                           // Initialisation du retour
+    var tmp = date2 - date1;
+ 
+    tmp = Math.floor(tmp/1000);             // Nombre de secondes entre les 2 dates
+    diff.sec = tmp % 60;                    // Extraction du nombre de secondes
+ 
+    tmp = Math.floor((tmp-diff.sec)/60);    // Nombre de minutes (partie entière)
+    diff.min = tmp % 60;                    // Extraction du nombre de minutes
+ 
+    tmp = Math.floor((tmp-diff.min)/60);    // Nombre d'heures (entières)
+    diff.hour = tmp % 24;                   // Extraction du nombre d'heures
+     
+    tmp = Math.floor((tmp-diff.hour)/24);   // Nombre de jours restants
+    diff.day = tmp;
+     
+    return diff;
+}
+
+var lastTr1;
+function block_ligne(objet,id_objet){
+    objet.className="option";
+    if(lastTr1)lastTr1.className="";
+    if(document.getElementById(id_objet).checked){
+        lastTr1.className="";
+        document.getElementById(id_objet).checked= false;
+    }else{
+        objet.className="blue";
+        lastTr1=objet;
+        document.getElementById(id_objet).checked = true;
+    }
+}
 
 $(document).ready(function() {
+    $('.table').footable();
     $("#btn_inject_info").on("click",function() {
         var nom = document.getElementById('info_nom').value;
         var contenue = document.getElementById('info_contenue').value;
@@ -216,7 +267,19 @@ $(document).ready(function() {
         }
         injecterInfo(information);
     })
-
+    $("#btn_recuperer_info").on("click",function() {
+        if(document.querySelector('input[name=radio_information]:checked')){
+            tableau =document.querySelector('input[name=radio_information]:checked').value;
+            chaine = tableau.split("#");
+            var nom = chaine[1];
+            var information = {
+                nom : nom
+            }
+            recupererInfo(information);
+        }else{
+            alert("select ligne");
+        }
+    })
 });
 
 

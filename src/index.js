@@ -1,11 +1,23 @@
 const express = require('express');
+//pour le chiffrement
 const CryptoJS  = require("crypto-js");
 const crypto = require("crypto");
+//instance pode local
 const LocalPod = require('solid-local-pod');
+//service
 const fetch = require('solid-local-pod/src/solidFileFetch');
 const httpsLocalhost = require('https-localhost')();
+//configuration du pod
 const nconf = require('nconf');
+//gestion des fichier
 const fs = require('fs');
+
+const { setInterval } = require('timers');
+const { log } = require('console');
+
+const espace = ['E1','E2','E3'];
+var catalogue = [] ; 
+var element = [];
 
   // mot clef pour le cryptage et décryptage
   const key = 'my-key';
@@ -138,6 +150,10 @@ app.get('/get_date',(req,res)=>{
     res.status(200).json(new Date());
 });
 
+app.get('afficher_info',(req,res)=>{
+
+})
+
 //10-recuperation de données
 app.post('/post_information', (req,res) => {
     // Décrypatage de l'iformation reçue en AES(Advanced Encryption Standard)
@@ -173,21 +189,141 @@ app.post('/injecter_info',async (req,res,next)=>{
     //Decrypter l'information et convertir en objet 
     const informationDecrypt = JSON.parse(Decryptage(req.body.info,key));
     //date
-    var dateSegementation= new Date();
+    var dateSegementation = new Date();
     // segmentation de l'information de l'information
     var tabData=informationDecrypt.contenue.split('');
-    console.log(tabData);
     //itteration des atomes 
-    
+    for (let index = 0; index < tabData.length; index++) {
+        const atomes = tabData[index];
+        const path = espace[Math.floor(Math.random() * (espace.length-1))];
+        const atomesSave =atomes+'*'+path+';'+dateSegementation;
+        element.push(atomesSave);
+        //creér l'atomes dans l'espace
+        createFile('./'+path+'/'+atomes,atomesSave);
+    }    
+    //inserer dans le catalogue
+    catalogue.push(informationDecrypt.nom+'#'+element+'');
+    console.log('ancienne '+catalogue);
+    createFile('catalogue',''+catalogue+''); 
+    //faire circuler les information dans le réseau
+    circulerAtomes(catalogue);
     res.status(200).send();
 })
+
+//creer un fichier
+function createFile(filePath,fileContent){
+    fs.writeFile(filePath, fileContent, (err) => {
+        if (err) throw err;
+    }); 
+}
+
+function DeletFile(file){
+    fs.unlink(file, function (err) {
+        if (err) throw err;
+      });
+}
+
+//aficher la liste des informations par une requette get
+app.get('/liste_informations',async(req,res,next)=>{
+    var value=[];
+    //parcourir les elements du catalogue
+    for (let index = 0; index < catalogue.length; index++) {
+        var data = catalogue[index];
+        //séparer le nom et les coordonnée
+        var dataTab = data.split('#');
+        nom = dataTab[0];
+        value.push({nom:nom});
+    } 
+    res.status(200).json(value);
+})
+
+//recuperer les informations par une requette Post
+app.post('/recuperer_info',async (req,res,next)=>{
+    const informationDecrypt = JSON.parse(Decryptage(req.body.info,key));
+    var value = recupererInfo(catalogue,informationDecrypt.nom);
+    res.status(200).json(value);
+})
+
+//fonction qui recuperer les informations
+function recupererInfo(catalogue, nom){
+    console.log(catalogue);
+    var information='';
+    //parcourir les elements du catalogue
+    for (let index = 0; index < catalogue.length; index++) {
+        var data = catalogue[index];
+        //séparer le nom et les coordonnée
+        var dataTab = data.split('#');
+        nom = dataTab[0];
+        atomesKCoordonee= dataTab[1];
+        atomes = atomesKCoordonee.split(',');
+        //[1*E1;Date,2*E2;Date]
+        for (let index = 0; index < atomes.length; index++) {            
+            const element = atomes[index];
+            //[1*E1,Date]
+            elmentAtomeEspace = element.split(';');
+            //[1,E1]
+            elementEspace = elmentAtomeEspace[0].split('*');
+            information = information + elementEspace[0] ;
+        }        
+    }
+    var value = {
+        nom:nom,
+        contenue :information
+    };
+    return value; 
+}
+
+function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+}
+
+//faire circuler les atomes suivant l'espace disponible et dans le temps 
+const deplacementSpace = 1;
+async function circulerAtomes(values){
+    var data = values;
+    var IntervalID = setInterval(()=>{ 
+        var dataTab = data[0].split('#');
+        var nom = dataTab[0];
+        atome = dataTab[1];
+        atomes = atome.split(',');
+        const newDate = new Date();
+        element=[];
+        catalogue=[];
+        console.log(nom);
+        for (let index = 0; index < atomes.length; index++) {
+            const elementt = atomes[index];
+            console.log(elementt);
+            const elementTab = elementt.split('*');
+            const coordonnee = elementTab[1].split(';');
+            const space = coordonnee[0].split('');
+            DeletFile('./'+coordonnee[0]+'/'+elementt[0]);
+         //ajouter un le deplacement, il est modulo de la logueur du array si il depasse , donc circulaire,
+         //si l'indice de l'espace commence par zero, le omdulo doit etre -1
+            var dep = parseInt(space[1])+deplacementSpace;
+            const numspace = espace.length<dep?((dep)%(espace.length) -1):dep;
+        
+            const newspace= space[0]+numspace;           
+            const path = newspace;
+            const atomesSave =elementTab[0]+'*'+path+';'+newDate;
+
+            element.push(atomesSave);
+
+            //creér l'atomes dans l'espace, pour la circulation
+            createFile('./'+newspace+'/'+elementTab[0],atomesSave);
+        }
+        //inserer dans le catalogue la nouvelle coordonneé
+        catalogue.push(nom+'#'+element+'');
+        createFile('catalogue',''+catalogue+''); 
+        data=catalogue;
+        console.log('====================||===================');
+    },1000);    
+}
 
 app.post('/deactivate_pod', (req, res, next) => {
     const { name } = req.body
     pods[name].stopListening()
 
-    res.status(200).send()
-    
+    res.status(200).send()    
 
     updateStorage()
 })

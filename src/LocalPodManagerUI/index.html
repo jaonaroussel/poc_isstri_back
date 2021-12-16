@@ -5,37 +5,81 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+    <title>POC ISSTRI</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="./bootstrap.min.css">
-
-    <title>POC ISSTRI</title>
+    <link rel="stylesheet" href="./css/footable.bootstrap.css">    
+    <style>
+        .blue{
+            background-color: #007bff;
+            color: white;
+        }
+        .option{
+            checked:checked;
+        }
+        tr{
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
     <div class="container">
-        <span id="clock" class="titre" style="font-weight: bold;font-size: large;"></span>  
-        <h1>Manage your local solid pods</h1>
-        <table class="table" id="active_pods">
-            <thead class="thead-dark">
-                <tr>
-                    <th scope="col">Name</th>
-                    <th scope="col">Port</th>
-                    <th scope="col">Local Path</th>
-                    <th scope="col">Status</th>
-                    <th scope="col">Edit/Delete</th>
-                </tr>
-            </thead>
-            </thead>
-            <tbody>
-                <!-- existing data could optionally be included here -->
-            </tbody>
-        </table>
+        <span id="clock" class="titre" style="font-weight: bold;font-size: 34px;"></span>
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation" style="width: 150px;">
+              <a class="nav-link active" id="Pod-tab" data-toggle="tab" href="#Pod" role="tab" aria-controls="Pod" aria-selected="true">Pod</a>
+            </li>
+            <li class="nav-item" role="presentation" style="width: 150px;">
+              <a class="nav-link" id="Information-tab" data-toggle="tab" href="#Information" role="tab" aria-controls="Information" aria-selected="false">Information</a>
+            </li>
+          </ul>
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="Pod" role="tabpanel" aria-labelledby="Pod-tab">
+                <h1>Gestion des Pods</h1>
+                <table class="table table-hover" id="active_pods">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Nom</th>
+                            <th scope="col">Port</th>
+                            <th scope="col">Chemin</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Edit/Delete</th>
+                        </tr>
+                    </thead>
+                    </thead>
+                    <tbody>
+                        <!-- existing data could optionally be included here -->
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-primary" style="width: 100px;" data-toggle="modal" data-target="#exampleModall" data-whatever="@mdo">Nouveau</button>
+                <button type="button" class="btn btn-primary" style="width: 100px;" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Injecter</button>
+            </div>
+            <div class="tab-pane fade" id="Information" role="tabpanel" aria-labelledby="Information-tab">
+                <table class="table">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>N°</th>
+                            <th>Nom</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr onclick="block_ligne(this,'1')" > 
+                            <td>1</td>
+                            <td>AMM<input type="radio" style="display: none;" id="1" value="1#AMM" name="radio_information"></td>
+                        </tr>
+                        <tr onclick="block_ligne(this,'2')" > 
+                            <td>2</td>
+                            <td>zertgyh<input type="radio" style="display: none;" id="2" value="2#zertgyh" name="radio_information"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-primary" id="btn_recuperer_info" style="width: 100px;">Recuperer</button>
+            </div>
+          </div>  
     </div>
 
-    <button type="button" class="btn btn-primary" style="width: 100px;" data-toggle="modal" data-target="#exampleModall" data-whatever="@mdo">Nouveau</button>
-    <button type="button" class="btn btn-primary" style="width: 100px;" data-toggle="modal" data-target="#exampleModal" data-whatever="@mdo">Injecter</button>
-    <div class="modal fade" id="exampleModall" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabell1">
+   <div class="modal fade" id="exampleModall" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabell1">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -57,7 +101,7 @@
                         <div class="form-group">
                             <label for="base_path">Local Directory</label>
                             <input type="text" class="form-control" id="base_path" aria-describedby="pod_name_help"
-                                placeholder="/home/user/my_pod/" required>
+                                placeholder="/Pod/user/my_pod/" required>
                             <small id="pod_name_help" class="form-text text-muted">This is were data from this pod will be
                                 stored to</small>
                         </div>
@@ -68,8 +112,8 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" id="info_annuler" class="btn btn-secondary" data-dismiss="modal" style="width: 100px;">Annuler</button>
-                    <button type="button" id="btn_inject_info" class="btn btn-primary" style="width: 100px;">Injecter</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" style="width: 100px;">Annuler</button>
+                    <button type="button" class="btn btn-primary" style="width: 100px;">Injecter</button>
                 </div>
             </div>
         </div>
@@ -87,17 +131,47 @@
                     <form>
                         <div class="form-group">
                             <label for="info_nom" class="control-label">Nom:</label>
-                            <input type="text" class="form-control" id="info_nom">
+                            <input type="text" class="form-control" id="info_nom"  />
                         </div>
                         <div class="form-group">
                             <label for="inf_contenue" class="control-label">Contenu:</label>
-                            <input class="form-control" id="info_contenue"/>
+                            <input class="form-control" id="info_contenue" />
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" id="info_annuler" class="btn btn-secondary" data-dismiss="modal" style="width: 100px;">Annuler</button>
                     <button type="button" id="btn_inject_info" class="btn btn-primary" style="width: 100px;">Injecter</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="Dialogue_information" tabindex="-1" role="dialog" aria-labelledby="Dialogue_informationLabel1">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="Dialogue_informationLabel1">Information</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="info_nom" class="control-label">Nom:</label>
+                            <input type="text" class="form-control" id="info_nom_recuperer"  />
+                        </div>
+                        <div class="form-group">
+                            <label for="inf_contenue" class="control-label">Contenu:</label>
+                            <input class="form-control" id="info_contenue_recuperer" />
+                        </div>
+                        <div class="form-group">
+                            <label for="inf_contenue" class="control-label">Durée:</label>
+                            <input class="form-control" id="info_dure_recuperer" />
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="info_annuler" class="btn btn-primary" data-dismiss="modal" style="width: 100px;">OK</button>
                 </div>
             </div>
         </div>
@@ -117,6 +191,7 @@
     <script src="./popper.min.js"></script>
     <script src="./bootstrap.min.js"></script>
     <script src="./aes.js"></script>
+    <script src="./js/footable.js"></script>
     <script type="application/javascript" src="./script.js"></script>
 </body>
 
